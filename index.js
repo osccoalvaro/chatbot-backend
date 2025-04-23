@@ -5,6 +5,8 @@ import cors from 'cors';
 import { ObjectId } from 'mongodb'; // Para manejar IDs de MongoDB
 import multer from 'multer'; // Importar multer para la carga de archivos
 import apoderadoRoutes from './routes/apoderados.js';
+import estudianteRoutes from './routes/estudiantes.js';
+import gradoRoutes from './routes/grados.js';
 
 dotenv.config();
 const app = express();
@@ -38,7 +40,9 @@ mongoose
 
     // Configurar las rutas después de que la conexión sea exitosa
     app.use('/api', apoderadoRoutes); // Prefijo /api para las rutas de apoderados
-
+    app.use('/api', estudianteRoutes);
+    app.use('/api', gradoRoutes);
+    
     // Endpoint para servir imágenes desde GridFS
     app.get('/api/images/:id', async (req, res) => {
       try {
