@@ -1,5 +1,5 @@
 // Ruta en tu backend Node.js
-import { Router } from 'express'
+/*import { Router } from 'express'
 const router = Router()
 
 router.put('/api/estudiantes/:id/estado', async (req, res) => {
@@ -14,8 +14,8 @@ router.put('/api/estudiantes/:id/estado', async (req, res) => {
     estudiante.estadoAdmision = nuevoEstado
     await estudiante.save()
 
-    // Si el estado cambia a 'Aceptado', enviar mensaje
-    if (estadoAnterior !== 'Aceptado' && nuevoEstado === 'Aceptado') {
+    // Si el estado cambia a 'Admitido', enviar mensaje
+    if (estadoAnterior !== 'Admitido' && nuevoEstado === 'Admitido') {
       const telefono = estudiante.apoderadoId.telefono
 
       // Enviar mensaje usando tu instancia del bot (ver siguiente paso)
@@ -29,4 +29,4 @@ router.put('/api/estudiantes/:id/estado', async (req, res) => {
   }
 })
 
-export default router
+export default router*/

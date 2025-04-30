@@ -34,5 +34,4 @@ router.put('/grados/:id', async (req, res) => {
   }
 });
 
-
 export default router;
