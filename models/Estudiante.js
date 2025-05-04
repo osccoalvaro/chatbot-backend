@@ -10,6 +10,8 @@ const estudianteSchema = new mongoose.Schema({
   imagen: { type: mongoose.Schema.Types.ObjectId, required: true }, // ID de GridFS
   imagenLibreta: { type: mongoose.Schema.Types.ObjectId, required: true }, // Imagen de la Libreta en GridFS
   estadoAdmision: { type: String, enum: ["Pendiente", "Admitido", "Observado"], default: "Pendiente" },
-  apoderadoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Apoderado', required: true }});
+  apoderadoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Apoderado', required: true },
+  pagoMatricula: { type: Boolean, default: false }
+});
 
-export const Estudiante = mongoose.model('Estudiante', estudianteSchema);
+export  const Estudiante = mongoose.model('Estudiante', estudianteSchema);

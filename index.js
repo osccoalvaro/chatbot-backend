@@ -7,13 +7,98 @@ import multer from 'multer'; // Importar multer para la carga de archivos
 import apoderadoRoutes from './routes/apoderados.js';
 import estudianteRoutes from './routes/estudiantes.js';
 import gradoRoutes from './routes/grados.js';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { Estudiante } from './models/Estudiante.js'; // Asegúrate de tener este modelo
+import axios from 'axios'
+import { enviarMensajeWhatsApp } from './services/whatsapp.js';
 
 dotenv.config();
 const app = express();
 
+// Configurar Mercado Pago
+const mercadopago = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN,
+});
+const payment = new Payment(mercadopago);
+
+
 // Configurar middlewares
 app.use(cors()); // Permite solicitudes desde diferentes orígenes
 app.use(express.json()); // Middleware para parsear JSON
+
+
+// Ruta del webhook de pagos
+app.post('/api/pagos/webhook', async (req, res) => {
+  const paymentData = req.body;
+  console.log("Webhook recibido:", JSON.stringify(paymentData, null, 2));
+
+  let paymentId;
+
+  if (paymentData.type === 'payment' && paymentData.data?.id) {
+    paymentId = paymentData.data.id;
+    console.log("ID recibido:", paymentId);
+
+    try {
+      const paymentResponse = await axios.get(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`
+        }
+      });
+
+      const payment = paymentResponse.data;
+      console.log("Datos del pago recibidos:", JSON.stringify(payment, null, 2));
+
+      // ✅ Verifica si metadata existe
+      if (payment.metadata && payment.metadata.estudiante_id) {
+        console.log("Metadata encontrada:", payment.metadata);
+
+        // ✅ Actualizar el campo pagoMatricula del estudiante
+        const estudianteId = payment.metadata.estudiante_id;
+
+        try {
+          const result = await Estudiante.findByIdAndUpdate(
+            estudianteId,
+            { pagoMatricula: true },
+            { new: true } // devuelve el documento actualizado
+          );
+
+          if (result) {
+            console.log(`✅ Estudiante actualizado: ${result.nombre} ${result.apellidoPaterno}`);
+
+            // Obtener información del apoderado y enviar mensaje WhatsApp
+            const estudianteConApoderado = await Estudiante.findById(estudianteId).populate('apoderadoId');
+            const telefono = estudianteConApoderado.apoderadoId?.telefono;
+            const nombreApoderado = estudianteConApoderado.apoderadoId?.nombre;
+
+            if (telefono && nombreApoderado) {
+              const mensaje = `Hola *${nombreApoderado}*,\n\nHemos recibido correctamente el pago de matrícula para *${estudianteConApoderado.nombre} ${estudianteConApoderado.apellidoPaterno} ${estudianteConApoderado.apellidoMaterno}*. ✅\n\nGracias por confiar en el *Colegio Montessori*. ¡Bienvenidos a esta nueva etapa académica! 🎉`;
+
+              try {
+                await enviarMensajeWhatsApp(telefono, mensaje);
+                console.log("📲 Mensaje de confirmación de matrícula enviado por WhatsApp.");
+              } catch (e) {
+                console.error("❌ Error al enviar mensaje de WhatsApp:", e.message);
+              }
+            } else {
+              console.warn("⚠️ No se encontró número de teléfono o nombre del apoderado.");
+            }
+          } else {
+            console.warn(`❌ No se encontró estudiante con ID: ${estudianteId}`);
+          }
+        } catch (dbError) {
+          console.error("❌ Error al actualizar el estudiante:", dbError.message);
+        }
+      } else {
+        console.warn("❌ No se encontró metadata en la respuesta del pago.");
+      }
+
+    } catch (error) {
+      console.error("Error al obtener los datos del pago:", error.response?.data || error.message);
+    }
+  }
+
+  res.sendStatus(200);
+});
 
 // Configurar multer para manejar las imágenes
 const storage = multer.memoryStorage();
@@ -42,7 +127,7 @@ mongoose
     app.use('/api', apoderadoRoutes); // Prefijo /api para las rutas de apoderados
     app.use('/api', estudianteRoutes);
     app.use('/api', gradoRoutes);
-    
+
     // Endpoint para servir imágenes desde GridFS
     app.get('/api/images/:id', async (req, res) => {
       try {

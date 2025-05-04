@@ -6,6 +6,7 @@ import { ObjectId } from 'mongodb';
 import { Estudiante } from '../models/Estudiante.js';
 import { enviarMensajeWhatsApp } from '../services/whatsapp.js';
 import { iniciarFlujoWhatsApp } from '../services/whatsapp.js';
+import { crearLinkDePago } from '../services/mercadopago.js'; // Asegúrate de tener esta función implementada
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -58,7 +59,7 @@ router.get('/images/:id', async (req, res) => {
 });
 
 // Ruta para actualizar el estado de admisión de un estudiante
-router.put('/estudiantes/:id/estado', async (req, res) => {
+router.put('/estudiantes/:id/estadoAdmision', async (req, res) => {
   try {
     const { estadoAdmision } = req.body;
     const estudiante = await Estudiante.findById(req.params.id).populate('apoderadoId');
@@ -81,6 +82,12 @@ router.put('/estudiantes/:id/estado', async (req, res) => {
       await new Promise(resolve => setTimeout(resolve, 2000))
       // Iniciar el flujo para pedir el Yape
       await iniciarFlujoWhatsApp(telefono, 'TRIGGER_YAPE')
+
+      // NUEVO BLOQUE: Si aún no ha pagado la matrícula, se genera link de pago
+      if (!estudiante.pagoMatricula) {
+        const link = await crearLinkDePago(estudiante._id);
+        await enviarMensajeWhatsApp(telefono, `Puedes realizar el pago de la matrícula en el siguiente enlace: ${link}`);
+      }
     }
 
     // Si cambió a 'Observado'
@@ -92,7 +99,7 @@ router.put('/estudiantes/:id/estado', async (req, res) => {
 
     res.json(estudiante);
   } catch (error) {
-    console.error('Error al actualizar el estado:', error);
+    console.error('Error al actualizar la Admisión:', error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
