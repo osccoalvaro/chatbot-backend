@@ -14,7 +14,7 @@ export const crearLinkDePago = async (estudianteId) => {
     items: [
       {
         title: "Colegio Montessori S.A.C. - Matrícula",
-        unit_price: 11,
+        unit_price: 200,
         quantity: 1,
         currency_id: "PEN",
       },
@@ -26,7 +26,7 @@ export const crearLinkDePago = async (estudianteId) => {
     },
     auto_return: "approved",
     //notification_url: "https://03be-190-43-23-119.ngrok-free.app/api/pagos/webhook",
-    notification_url: "https://inspection-punk-joe-posts.trycloudflare.com/api/pagos/webhook",  
+    notification_url: "https://specifics-controllers-corp-william.trycloudflare.com/api/pagos/webhook",  
     metadata: {
       estudianteId,
     },

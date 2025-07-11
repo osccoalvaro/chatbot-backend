@@ -92,7 +92,7 @@ router.put('/estudiantes/:id/estadoAdmision', async (req, res) => {
 
     // Si cambió a 'Observado'
     if (estadoAdmision === 'Observado' && estadoAnterior !== 'Observado') {
-      const mensaje = `Hola *${nombreApoderado}*,\n\nGracias por completar el formulario de admisión del estudiante *${estudiante.nombre} ${estudiante.apellidoPaterno} ${estudiante.apellidoMaterno}*.\n\nTras revisar la información enviada, hemos identificado que hay algunos puntos por aclarar para continuar con el proceso de admisión. ✍️\n\nUn asesor del colegio se pondrá en contacto contigo pronto para ayudarte y brindarte orientación personalizada.`;
+      const mensaje = `Hola *${nombreApoderado}*,\nGracias por completar el formulario de admisión del estudiante *${estudiante.nombre} ${estudiante.apellidoPaterno} ${estudiante.apellidoMaterno}*.\n\nTras revisar la información enviada, hemos identificado que hay algunos puntos por aclarar para continuar con el *Proceso de Admisión*. ✍️\n\nUn asesor del colegio se pondrá en contacto contigo pronto para ayudarte y brindarte orientación personalizada. 👩‍💻`;
   
       await enviarMensajeWhatsApp(telefono, mensaje);
     }
@@ -101,6 +101,16 @@ router.put('/estudiantes/:id/estadoAdmision', async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar la Admisión:', error);
     res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// Obtener todos los estudiantes
+router.get('/estudiantes', async (req, res) => {
+  try {
+    const estudiantes = await Estudiante.find(); // Trae todos los estudiantes
+    res.json(estudiantes);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los estudiantes' });
   }
 });
 

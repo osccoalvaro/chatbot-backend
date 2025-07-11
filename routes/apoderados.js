@@ -1,3 +1,4 @@
+// routes/apoderado.js
 import express from 'express';
 import { Apoderado } from '../models/Apoderado.js';
 import { Estudiante } from '../models/Estudiante.js'; // Asegúrate de importar el modelo de Estudiante

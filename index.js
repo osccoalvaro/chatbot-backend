@@ -5,12 +5,14 @@ import cors from 'cors';
 import { ObjectId } from 'mongodb'; // Para manejar IDs de MongoDB
 import multer from 'multer'; // Importar multer para la carga de archivos
 import apoderadoRoutes from './routes/apoderados.js';
+import colaboradorRoutes from './routes/colaboradores.js';
 import estudianteRoutes from './routes/estudiantes.js';
 import gradoRoutes from './routes/grados.js';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { Estudiante } from './models/Estudiante.js'; // Asegúrate de tener este modelo
 import axios from 'axios'
 import { enviarMensajeWhatsApp } from './services/whatsapp.js';
+import authRoutes from './routes/auth.js';
 
 dotenv.config();
 const app = express();
@@ -127,6 +129,8 @@ mongoose
     app.use('/api', apoderadoRoutes); // Prefijo /api para las rutas de apoderados
     app.use('/api', estudianteRoutes);
     app.use('/api', gradoRoutes);
+    app.use('/api', authRoutes);
+    app.use('/api', colaboradorRoutes);
 
     // Endpoint para servir imágenes desde GridFS
     app.get('/api/images/:id', async (req, res) => {
